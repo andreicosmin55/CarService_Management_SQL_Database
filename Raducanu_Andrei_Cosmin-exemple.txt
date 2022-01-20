@@ -1,0 +1,122 @@
+--Cereri SQL pentru exercitiul 11
+
+--1. Scrieti o cerere SQL in care sa se afiseze codul, numele si prenumele, data angajarii a angajatilor care lucreaza ca mecanic
+--sau lucreaza in bucuresti si sunt angajati dupa data de 14 spetembrie 2020.
+--sa se afiseze si id_ul service-ului in care lucreaza, anul infiintarii acestuia(daca e null 0), numele, id_locatiei in care se afla, localitatea, id_ul jobului angajatilor si numele acestuia.
+
+SELECT id_angajat, nume_angajat, prenume_angajat, data_angajarii, s.id_service, NVL(an_infiintare, 0), nume_service, l.id_locatie, localitate, j.id_job, nume_job
+FROM angajat a JOIN services s ON(a.id_service = s.id_service) 
+               JOIN locatie l ON(s.id_locatie = l.id_locatie)
+               JOIN jobs j ON(a.id_job = j.id_job)
+WHERE UPPER(nume_job) LIKE '%MECANIC%' OR (LOWER(localitate) LIKE '%bucuresti%' AND data_angajarii > ADD_MONTHS('14-MAR-2020', 6))
+ORDER BY id_angajat desc;
+
+
+
+--2. Scrieti o cerere SQL in care sa se afiseze codul, numele si prenumele concatentate ale angajatilor care lucreaza in service-ul ce se afla in locatia cu codul maxim.
+--cerere necorelata/nesincronizata
+
+SELECT id_angajat, CONCAT(nume_angajat||' ', prenume_angajat)"Nume si Prenume"
+FROM angajat a
+WHERE a.id_service IN 
+    (SELECT id_service
+    FROM services s
+    WHERE s.id_locatie =
+        (SELECT MAX(id_locatie)
+        FROM locatie l
+        )
+    );
+
+
+
+--3. Scrieti o cerere SQL care afiseaza codul si numele service-urilor ale caror nume contin sirul 'Wheel', precum si salariul mediu din acestea si localitatea in care se afla.
+--Coloanele se vor denumi sugestiv
+
+SELECT id_service, nume_service, 
+    (SELECT round(AVG(salariu),2)
+    FROM angajat
+    WHERE s.id_service = id_service) "Salariu Mediu",
+    (SELECT localitate
+    FROM locatie
+    WHERE id_locatie = s.id_locatie) "Localitate"
+FROM services s
+WHERE nume_service LIKE '%Wheel%';
+    
+
+
+--4. Scrieti o cerere SQL care numara job-urile diferite din fiecare service si afiseaza numarul acestora doar daca este mai mare de 2, 
+--alaturi de codul service-ului si de numele acestuia.
+
+SELECT COUNT(a.id_job), s.id_service, s.nume_service
+FROM jobs j JOIN angajat a ON (a.id_job = j.id_job)
+            JOIN services s ON(a.id_service = s.id_service)
+GROUP BY s.id_service, s.nume_service
+HAVING COUNT(a.id_job) > 2;
+
+
+
+--5. Scrieti o cerere SQL utilizand clauza WITH pentru a obtine suma salariilor din fiecare service in functie de job_id
+
+WITH valoare_job AS (SELECT nume_job, SUM(salariu) AS total
+FROM jobs j join angajat a ON(j.id_job = a.id_job)
+GROUP BY nume_job)
+SELECT * 
+FROM valoare_job
+order by nume_job;
+
+
+
+--6. Scrieti o cerere SQL care sa afiseze numele, prenumele, data_angajarii si salariul inital, alaturi de salariul marit cu 50%(pentru angajatii care s-au angajat in anii 2000 sau 2001)
+--si salariul micsorat cu 10% pentru angajatii care s-au angajat in anii 2002, 2003 sau 2004. Coloanele se vor denumi sugestiv, iar in cazul in care nu s-au produs modificari ale
+--salariului initial in vreuna dintre noile coloane, se va trece salariul initial.
+
+SELECT nume_angajat, prenume_angajat, data_angajarii, salariu, 
+NVL((DECODE(TO_CHAR(data_angajarii, 'yyyy'), '2000', salariu * 1.5, '2001', salariu* 1.5)), salariu) "Salariu marit",
+ CASE TO_CHAR(data_angajarii, 'yyyy') 
+ WHEN '2002' THEN salariu * 0.9
+ WHEN '2003' THEN salariu * 0.9
+ WHEN '2004' THEN salariu * 0.9
+ ELSE salariu
+ END "Salariu micsorat"
+FROM angajat;
+
+
+
+
+--Operatii de actualizare sau suprimare a datelor folosind subcereri
+
+
+
+--1. Actualizarea atributului valoare (la media aritmetică a tuturor valorilor) din tabelul furnizor dacă este mai mare decât media valorilor. 
+
+UPDATE furnizor
+SET (valoare) = (SELECT AVG(valoare)
+                 FROM FURNIZOR)
+WHERE valoare > (SELECT AVG(valoare)
+                 FROM FURNIZOR);
+ROLLBACK;
+select* from furnizor;
+
+
+
+--2. Actualizarea atributului durata (la media aritmetică a acestora) din tabelul contract dacă este mai mare decât media aritmetică a tuturor duratelor.
+
+UPDATE contract
+SET (durata) = (SELECT MIN(durata)
+                 FROM contract)
+WHERE durata > (SELECT AVG(durata)
+                 FROM contract);
+SELECT* FROM CONTRACT;
+ROLLBACK;
+
+
+
+--3. Suprimarea datelor din tabelul monteaza dacă salariul angajatului este mai mare decât 15000 și este angajat dupa data de 1 ianuarie 2010.
+
+DELETE FROM monteaza
+WHERE id_angajat IN 
+    (SELECT a.id_angajat
+     FROM angajat a
+     WHERE salariu > 15000 and data_angajarii > '01-JAN-2010');
+SELECT* FROM MONTEAZA;
+ROLLBACK;

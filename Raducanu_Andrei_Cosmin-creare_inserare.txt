@@ -1,0 +1,294 @@
+CREATE TABLE LOCATIE 
+    (id_locatie number(6), 
+    judet varchar2(20) constraint judet_nn not null,
+    localitate varchar2(30) constraint localitate_nn not null,
+    strada varchar2(30) constraint strada_nn not null,
+    numar number(3) constraint numar_nn not null,
+    cod_postal varchar2(6),
+    constraint pk_locatie primary key(id_locatie),
+    check(numar > 0)
+    );
+
+CREATE SEQUENCE SEQUENCE_LOCATIE
+INCREMENT BY 1
+START WITH 0
+MINVALUE 0
+MAXVALUE 100
+NOCYCLE;
+
+INSERT INTO LOCATIE VALUES(SEQUENCE_LOCATIE.NEXTVAL, 'sector 4', 'Bucuresti', 'Giurgiului', '109', '050355');
+INSERT INTO LOCATIE VALUES(SEQUENCE_LOCATIE.NEXTVAL, 'sector 5', 'Bucuresti', 'Ogradei', '4', '050325');
+INSERT INTO LOCATIE VALUES(SEQUENCE_LOCATIE.NEXTVAL, 'Cluj', 'Cluj-Napoca', 'Nicolae Titulescu', '14', '400420');
+INSERT INTO LOCATIE VALUES(SEQUENCE_LOCATIE.NEXTVAL, 'Timis', 'Timisoara', 'Motilor', '13', '300200');
+INSERT INTO LOCATIE VALUES(SEQUENCE_LOCATIE.NEXTVAL, 'Constanta', 'Constanta', 'Baba Novac', '12', '900325');
+INSERT INTO LOCATIE VALUES(SEQUENCE_LOCATIE.NEXTVAL, 'sector 5', 'Bucuresti', 'Ogradei', '56', '050355');
+COMMIT;
+
+SELECT* FROM LOCATIE;
+
+------------------------------------
+
+CREATE TABLE SERVICES 
+    (id_service number(6),
+    nume_service varchar2(6) constraint nume_service_nn not null,
+    an_infiintare number(4),
+    id_locatie number(6),
+    constraint pk_service primary key(id_service),
+    constraint fk_service_locatie foreign key(id_locatie) references LOCATIE(id_locatie),
+    check (an_infiintare > 1900)
+    );
+
+alter table services --am modificat dimensiunea numelui service-urilor, deoarece am gresit dimensiunea initiala.
+modify (nume_service varchar2(40));
+
+CREATE SEQUENCE SEQUENCE_SERVICE
+START WITH 100
+INCREMENT BY 1
+MINVALUE 0
+MAXVALUE 200
+NOCYCLE;
+
+INSERT INTO SERVICES VALUES(SEQUENCE_SERVICE.NEXTVAL, 'Engine-fixers', '2005', 4);
+INSERT INTO SERVICES VALUES(SEQUENCE_SERVICE.NEXTVAL, 'Crazy-Wheel', '1998', 5);
+INSERT INTO SERVICES VALUES(SEQUENCE_SERVICE.NEXTVAL, 'ReadytoGo', '2015', 2);
+INSERT INTO SERVICES VALUES(SEQUENCE_SERVICE.NEXTVAL, 'WheelUp', '2020', 1);
+INSERT INTO SERVICES VALUES(SEQUENCE_SERVICE.NEXTVAL, 'BestService', '1995', 3);
+INSERT INTO SERVICES VALUES(SEQUENCE_SERVICE.NEXTVAL, 'BestService SRL',NULL,  6);
+COMMIT;
+
+SELECT* FROM SERVICES;
+
+------------------------------------
+
+CREATE TABLE JOBS
+    (id_job number(6),
+    nume_job varchar2(30) constraint nume_job_nn not null,
+    salariu_max number(6) constraint salariu_max_nn not null,
+    salariu_min number(6)constraint salariu_min_nn not null,
+    constraint pk_jobs primary key(id_job)
+    );
+
+INSERT INTO JOBS VALUES(500, 'Mecanic', '30000', '9000');
+INSERT INTO JOBS VALUES(501, 'Tinichigiu', '20000', '5000');
+INSERT INTO JOBS VALUES(502, 'Electrician auto', '25000', '6500');
+INSERT INTO JOBS VALUES(503, 'Contabil', '22500', '9300');
+INSERT INTO JOBS VALUES(504, 'Tehnician auto', '35000', '12000');
+INSERT INTO JOBS VALUES(505, 'Manager', '50000', '16000');
+INSERT INTO JOBS VALUES(506, 'Ucenic', '5000', '1000');
+COMMIT;
+
+SELECT* FROM JOBS;
+
+------------------------------------
+
+CREATE TABLE ANGAJAT 
+    (id_angajat number(6),
+    nume_angajat varchar2(30) constraint nume_angajat_nn not null,
+    prenume_angajat varchar2(30) constraint prenume_angajat_nn not null,
+    salariu number(6) constraint salariu_nn not null,
+    data_angajarii date default sysdate,
+    id_service number(6),
+    id_job number(6),
+    constraint pk_angajat primary key(id_angajat),
+    constraint fk_angajat_service foreign key (id_service) references SERVICES(id_service),
+    constraint fk_angajat_job foreign key(id_job) references JOBS(id_job)
+    );
+    select* from angajat;
+CREATE SEQUENCE SEQUENCE_ANGAJAT
+START WITH 1003
+INCREMENT BY 1
+MAXVALUE 2000
+NOCYCLE;
+    
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Vasile', 'Ionel', '12000', TO_DATE('23/11/2009', 'DD/MM/YYYY'), '102', '500');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Ionescu', 'Gigel', '10000', TO_DATE('28/10/2003', 'DD/MM/YYYY'), '102', '502');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Vasilescu', 'Ion', '11550', TO_DATE('11/02/1999', 'DD/MM/YYYY'), '102', '503');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Popescu', 'Marin', '16000', TO_DATE('19/07/2019','DD/MM/YYYY'), '101', '500');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Iordache', 'Adrian', '6000', TO_DATE('23/05/2017', 'DD/MM/YYYY'), '101', '501');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Enescu', 'Alin', '42500', TO_DATE('05/03/2007', 'DD/MM/YYYY'), '101', '505');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Deculescu', 'Emanuel', '10000', TO_DATE('26/04/2016', 'DD/MM/YYYY'), '103', '503');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Mircescu', 'Ovidiu', '95000', TO_DATE('28/08/2016', 'DD/MM/YYYY'), '103', '500');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Sandu', 'Mircea', '7000', TO_DATE('21/12/2019', 'DD/MM/YYYY'), '103', '501');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Patrascu', 'Dorel', '18550', TO_DATE('13/04/2021', 'DD/MM/YYYY'), '104', '504');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Davidescu', 'Filip', '10800', TO_DATE('15/02/2021', 'DD/MM/YYYY'), '104', '503');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Isarescu', 'Iulian', '25000',TO_DATE('29/11/2020', 'DD/MM/YYYY'), '104', '505');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Pascanu', 'Grigore', '1500',TO_DATE('06/01/1996', 'DD/MM/YYYY'), '105', '506');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Niculai', 'Radu', '12000', TO_DATE('20/05/2003', 'DD/MM/YYYY'), '105', '501');
+INSERT INTO ANGAJAT VALUES(SEQUENCE_ANGAJAT.NEXTVAL, 'Petrescu', 'Petre', '15500', TO_DATE('5/09/2000', 'DD/MM/YYYY'), '108', '500');
+COMMIT;
+
+SELECT* FROM ANGAJAT;
+
+------------------------------------------
+
+CREATE TABLE CLIENTS
+    (id_client number(6),
+    nume_client varchar2(30) constraint nume_client_nn not null,
+    prenume_client varchar2(30),
+    numar_telefon varchar2(13),
+    constraint pk_client primary key(id_client)
+    );
+INSERT INTO CLIENTS VALUES('10000', 'Raducanu', 'Andrei', '0712345678');
+INSERT INTO CLIENTS VALUES('10001', 'Raducanu', 'Cosmin', '0712345679');
+INSERT INTO CLIENTS VALUES('10002', 'Raducanu', 'Nicusor', '0712345689');
+INSERT INTO CLIENTS VALUES('10003', 'Raducanu', 'Gabriel', '0712345690');
+INSERT INTO CLIENTS VALUES('10004', 'Andrei', 'Cosmin', '0142142142');
+COMMIT;
+
+SELECT* FROM CLIENTS;
+
+--------------------------------------------
+
+CREATE TABLE MASINA 
+    (
+    id_masina number(6),
+    marca varchar(20) constraint marca_nn not null,
+    an_fabricatie number(4) constraint an_fabricatie_nn not null,
+    constraint pk_masina primary key(id_masina),
+    check(an_fabricatie>1960)
+    );
+INSERT INTO MASINA VALUES('10100', 'Audi', '2008');
+INSERT INTO MASINA VALUES('10101', 'BMW', '2012');
+INSERT INTO MASINA VALUES('10102', 'Mercedes-Benz', '2015');
+INSERT INTO MASINA VALUES('10103', 'Skoda', '2006');
+INSERT INTO MASINA VALUES('10104', 'Volkswagen', '1998');
+INSERT INTO MASINA VALUES('10105', 'Afla Romeo', '2002');
+INSERT INTO MASINA VALUES('10106', 'Ford', '2018');
+INSERT INTO MASINA VALUES('10107', 'Fiat', '2017');
+INSERT INTO MASINA VALUES('10108', 'Dacia', '2020');
+INSERT INTO MASINA VALUES('10109', 'Jeep', '2005');
+INSERT INTO MASINA VALUES('10110', 'Tesla', '2021');
+COMMIT;
+
+SELECT* FROM MASINA;
+
+---------------------------------
+
+CREATE TABLE PROGRAMARE
+    (id_programare number(6),
+    data_programare date default sysdate,
+    id_client number(6),
+    constraint pk_programare primary key(id_programare),
+    constraint fk_programare_client foreign key(id_client) references CLIENTS(id_client)
+    );
+INSERT INTO PROGRAMARE VALUES('100000', TO_DATE('31/05/2021', 'DD/MM/YYYY'), '10000');
+INSERT INTO PROGRAMARE VALUES('100001', TO_DATE('21/06/2021', 'DD/MM/YYYY'), '10001');
+INSERT INTO PROGRAMARE VALUES('100002', TO_DATE('17/06/2021', 'DD/MM/YYYY'), '10000');
+INSERT INTO PROGRAMARE VALUES('100003', TO_DATE('15/07/2021', 'DD/MM/YYYY'), '10002');
+INSERT INTO PROGRAMARE VALUES('100004', TO_DATE('03/08/2021', 'DD/MM/YYYY'), '10003');
+INSERT INTO PROGRAMARE VALUES('100005', TO_DATE('20/08/2021', 'DD/MM/YYYY'), '10004');
+INSERT INTO PROGRAMARE VALUES('100006', TO_DATE('28/08/2021', 'DD/MM/YYYY'), '10001');
+COMMIT;
+
+SELECT* FROM PROGRAMARE;
+
+----------------------------------
+
+CREATE TABLE CONTRACT
+    (id_contract number(6),
+    data_incepere date constraint data_incepere_nn not null,
+    durata number(3, 3) constraint durata_nn not null,
+    constraint pk_contract primary key(id_contract)
+    );
+    
+ALTER TABLE CONTRACT
+MODIFY DURATA NUMBER(6, 2);
+    
+INSERT INTO CONTRACT VALUES('20000', TO_DATE('22/07/2019', 'DD/MM/YYYY'), '3');
+INSERT INTO CONTRACT VALUES('20001', TO_DATE('18/09/2018', 'DD/MM/YYYY'), '3.5');
+INSERT INTO CONTRACT VALUES('20002', TO_DATE('12/11/2020', 'DD/MM/YYYY'), '1.25');
+INSERT INTO CONTRACT VALUES('20003', TO_DATE('05/02/2013', 'DD/MM/YYYY'), '10.5');
+INSERT INTO CONTRACT VALUES('20004', TO_DATE('31/05/2016', 'DD/MM/YYYY'), '6.75');
+COMMIT;
+
+SELECT* FROM CONTRACT;
+
+------------------------------------------
+
+CREATE TABLE FURNIZOR
+    (id_furnizor number(6),
+    nume_furnizor varchar2(40) constraint nume_furnizor_nn not null,
+    valoare number(8) constraint valoare_nn not null,
+    id_contract number(6),
+    constraint pk_furnizor primary key(id_furnizor),
+    constraint fk_furnizor_contract foreign key(id_contract) references CONTRACT(id_contract)
+    );
+    
+INSERT INTO FURNIZOR VALUES('30000', 'Auto Rebel', '1000000', '20000');
+INSERT INTO FURNIZOR VALUES('30001', 'Lipi Impex 2110', '1800000', '20004');
+INSERT INTO FURNIZOR VALUES('30002', 'Unix', '7200000', '20002');
+INSERT INTO FURNIZOR VALUES('30003', 'Renault', '500000', '20003');
+INSERT INTO FURNIZOR VALUES('30004', 'Mercedes-Benz', '350000', '20001');
+COMMIT;
+
+SELECT* FROM FURNIZOR;
+
+-------------------------------------
+
+CREATE TABLE PIESA
+    (id_piesa number(6),
+    nume_piesa varchar2(35)constraint nume_piesa_nn not null,
+    fabricata_de varchar2(40) constraint fabricata_de_nn not null,
+    id_furnizor number(6),
+    constraint pk_piesa primary key(id_piesa),
+    constraint fk_piesa_furnizor foreign key(id_furnizor) references FURNIZOR(id_furnizor)
+    );
+    
+INSERT INTO PIESA VALUES('40000', 'Bujie', 'Renault', '30004');
+INSERT INTO PIESA VALUES('40001', 'Ambreiaj', 'Mercedes-Benz', '30002');
+INSERT INTO PIESA VALUES('40002', 'Bucsa', 'Volkswagen', '30001');
+INSERT INTO PIESA VALUES('40003', 'Catalizator', 'Alfa Romeo', '30003');
+INSERT INTO PIESA VALUES('40004', 'Curea transmisie', 'Porsche', '30000');
+COMMIT;
+
+SELECT* FROM PIESA;
+
+-----------------------------------------
+
+CREATE TABLE MONTEAZA
+    (id_angajat number(6),
+    id_piesa number(6),
+    constraint pk_monteaza primary key(id_angajat, id_piesa),
+    constraint fk_monteaza_angajat foreign key(id_angajat) references ANGAJAT(id_angajat),
+    constraint fk_monteaza_piesa foreign key(id_piesa) references PIESA(id_piesa)
+    );
+    
+INSERT INTO MONTEAZA VALUES('1004', '40000');
+INSERT INTO MONTEAZA VALUES('1004', '40003');
+INSERT INTO MONTEAZA VALUES('1005', '40002');
+INSERT INTO MONTEAZA VALUES('1005', '40001');
+INSERT INTO MONTEAZA VALUES('1006', '40002');
+INSERT INTO MONTEAZA VALUES('1007', '40001');
+INSERT INTO MONTEAZA VALUES('1009', '40003');
+INSERT INTO MONTEAZA VALUES('1011', '40004');
+INSERT INTO MONTEAZA VALUES('1010', '40000');
+INSERT INTO MONTEAZA VALUES('1014', '40001');
+COMMIT;
+
+SELECT* FROM MONTEAZA;
+
+-----------------------------------------
+
+CREATE TABLE REPARA 
+    (id_angajat number(6),
+    id_masina number(6),
+    id_client number(6),
+    constraint pk_repara primary key(id_angajat, id_masina, id_client),
+    constraint fk_repara_angajat foreign key(id_angajat) references ANGAJAT(id_angajat),
+    constraint fk_repara_client foreign key(id_client) references CLIENTS(id_client),
+    constraint fk_repara_masina foreign key(id_masina) references MASINA(id_masina)
+    );
+    
+INSERT INTO REPARA VALUES('1005', '10100', '10003');
+INSERT INTO REPARA VALUES('1004', '10101', '10002');
+INSERT INTO REPARA VALUES('1006', '10102', '10000');
+INSERT INTO REPARA VALUES('1007', '10103', '10001');
+INSERT INTO REPARA VALUES('1009', '10104', '10004');
+INSERT INTO REPARA VALUES('1010', '10105', '10002');
+INSERT INTO REPARA VALUES('1011', '10106', '10001');
+INSERT INTO REPARA VALUES('1012', '10107', '10000');
+INSERT INTO REPARA VALUES('1016', '10104', '10003');
+INSERT INTO REPARA VALUES('1017', '10102', '10004');
+COMMIT;
+
+SELECT* FROM REPARA;
